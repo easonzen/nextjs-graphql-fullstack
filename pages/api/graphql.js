@@ -1,6 +1,9 @@
 const { ApolloServer, gql } = require("apollo-server-micro");
+const cors = require('micro-cors')();
+const { send } = require('micro');
 const {
-    ApolloServerPluginLandingPageGraphQLPlayground
+    ApolloServerPluginLandingPageProductionDefault,
+    ApolloServerPluginLandingPageLocalDefault,
 } = require('apollo-server-core');
 
 const typeDefs = gql`
@@ -36,8 +39,16 @@ const resolvers = {
 const server = new ApolloServer({
     typeDefs,
     resolvers,
+    csrfPrevention: true,
+    plugins: [
+        process.env.NODE_ENV === "production" ?
+            ApolloServerPluginLandingPageProductionDefault({ footer: false }) :
+            ApolloServerPluginLandingPageLocalDefault({ footer: false, embed: true })
+    ]
 });
 
 module.exports = server.start().then(() => {
-    return server.createHandler({ path: "/api/graphql" });
+    const handler = server.createHandler({ path: "/api/graphql" });
+    return cors((req, res) => req.method === 'OPTIONS' ? send(res, 200, 'ok') : handler(req, res));
+    // return server.createHandler({ path: "/api/graphql" });
 })
