@@ -1,8 +1,30 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
+import { useEffect, useRef, useState } from "react";
+import axios from 'axios';
 
 export default function Home() {
+  const [states, setStates] = useState({
+    name: ""
+  });
+  const renderRef = useRef(true);
+
+  useEffect(() => {
+    if (renderRef.current) {
+      renderRef.current = false;
+
+      axios.get("/api/hello").then(res => {
+        console.log(res);
+        setStates({
+          name: res.data.name,
+        });
+      });
+
+      return;
+    }
+  }, [])
+
   return (
     <div className={styles.container}>
       <Head>
@@ -14,6 +36,7 @@ export default function Home() {
       <main className={styles.main}>
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
+          <p>Author: {states.name}</p>
         </h1>
 
         <p className={styles.description}>
