@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect } from "react";
 import { ApolloClient, InMemoryCache, ApolloProvider, gql } from '@apollo/client';
 
-export default function article() {
+export default function Article() {
     const router = useRouter();
     const { id } = router.query;
 
@@ -31,7 +31,7 @@ export default function article() {
 
     useEffect(() => {
         getArticles();
-    });
+    }, [getArticles]);
 
     return (
         <div>
