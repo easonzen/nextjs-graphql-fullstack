@@ -4,8 +4,8 @@ import {
   ApolloServerPluginLandingPageLocalDefault,
 } from "apollo-server-core";
 
-import cors from "micro-cors";
-import { send } from "micro";
+import Cors from "micro-cors";
+// import { send } from "micro";
 
 const typeDefs = gql`
   type Book {
@@ -35,9 +35,9 @@ const resolvers = {
   },
 };
 
-// The ApolloServer constructor requires two parameters: your schema
-// definition and your set of resolvers.
-const server = new ApolloServer({
+const cors = Cors();
+
+const apolloServer = new ApolloServer({
   typeDefs,
   resolvers,
   csrfPrevention: true,
@@ -52,10 +52,18 @@ const server = new ApolloServer({
   ],
 });
 
-module.exports = server.start().then(() => {
-  return cors()((req, res) =>
-    req.method === "OPTIONS"
-      ? send(res, 200, "ok")
-      : server.createHandler({ path: "/api/graphql" })(req, res)
-  );
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+const startServer = apolloServer.start();
+
+export default cors(async function handler(req, res) {
+  await startServer;
+
+  await apolloServer.createHandler({
+    path: "/api/graphql",
+  })(req, res);
 });
