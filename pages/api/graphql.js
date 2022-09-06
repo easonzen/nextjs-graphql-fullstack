@@ -1,10 +1,11 @@
-const { ApolloServer, gql } = require("apollo-server-micro");
-const cors = require("micro-cors")();
-const { send } = require("micro");
-const {
+import { ApolloServer, gql } from "apollo-server-micro";
+import {
   ApolloServerPluginLandingPageProductionDefault,
   ApolloServerPluginLandingPageLocalDefault,
-} = require("apollo-server-core");
+} from "apollo-server-core";
+
+import cors from "micro-cors";
+import { send } from "micro";
 
 const typeDefs = gql`
   type Book {
@@ -40,6 +41,7 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   csrfPrevention: true,
+  cache: "bounded",
   plugins: [
     process.env.NODE_ENV === "production"
       ? ApolloServerPluginLandingPageProductionDefault({ footer: false })
@@ -51,9 +53,9 @@ const server = new ApolloServer({
 });
 
 module.exports = server.start().then(() => {
-  const handler = server.createHandler({ path: "/api/graphql" });
-  return cors((req, res) => {
-    return req.method === "OPTIONS" ? send(res, 200, "ok") : handler(req, res);
-  });
-  // return server.createHandler({ path: "/api/graphql" });
+  return cors()((req, res) =>
+    req.method === "OPTIONS"
+      ? send(res, 200, "ok")
+      : server.createHandler({ path: "/api/graphql" })(req, res)
+  );
 });
