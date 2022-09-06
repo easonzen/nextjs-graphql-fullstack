@@ -1,5 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@mui/material";
 import styles from "../styles/Home.module.css";
 import axios from "axios";
 
@@ -26,6 +28,9 @@ export default function Home({ name }) {
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
           <p>Author: {name}</p>
+          <Link href="/articles/1">
+            <Button variant="contained">Link to Articles</Button>
+          </Link>
         </h1>
 
         <p className={styles.description}>

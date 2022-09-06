@@ -1,19 +1,48 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, Fragment } from "react";
 import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
+  Button,
+  Divider,
+} from "@mui/material";
 
-export default function Article() {
+const client = new ApolloClient({
+  uri: "http://localhost:3000/api/graphql",
+  cache: new InMemoryCache(),
+});
+
+export async function getServerSideProps() {
+  const res = await client.query({
+    query: gql`
+      query GetBooks {
+        books {
+          id
+          title
+          author
+        }
+      }
+    `,
+  });
+
+  return {
+    props: {
+      books: res.data.books,
+    },
+  };
+}
+
+export default function Article({ books }) {
   const [states, setStates] = useState({
     book: {},
   });
   const router = useRouter();
   const { id } = router.query;
-
-  const client = new ApolloClient({
-    uri: "/api/graphql",
-    cache: new InMemoryCache(),
-  });
 
   const getArticles = useCallback(() => {
     if (!id) {
@@ -36,7 +65,6 @@ export default function Article() {
         },
       })
       .then((result) => {
-        console.log(result);
         setStates({
           book: result.data.book,
         });
@@ -56,9 +84,40 @@ export default function Article() {
       </Head>
 
       <main>
-        <p>Book ID: {states.book.id || "--"}</p>
-        <p>Book Title: {states.book.title || "--"}</p>
-        <p>Book Author: {states.book.author || "--"}</p>
+        <Box className="books-wrap">
+          <Typography>Book List</Typography>
+          {books.map((book, key) => (
+            <Fragment>
+              <Card key={book.id} sx={{ maxWidth: 345 }}>
+                <CardContent>
+                  <Typography>Book ID: {book.id || "--"}</Typography>
+                  <Typography>Book Title: {book.title || "--"}</Typography>
+                  <Typography>Book Author: {book.author || "--"}</Typography>
+                </CardContent>
+                <CardActions>
+                  <Button size="small">Share</Button>
+                  <Button size="small">Learn More</Button>
+                </CardActions>
+              </Card>
+              {key !== books.length && <Divider />}
+            </Fragment>
+          ))}
+        </Box>
+        <br />
+        <br />
+        <br />
+        <Typography>Book By ID: {states.book.id}</Typography>
+        <Card sx={{ maxWidth: 345 }}>
+          <CardContent>
+            <Typography>Book ID: {states.book.id || "--"}</Typography>
+            <Typography>Book Title: {states.book.title || "--"}</Typography>
+            <Typography>Book Author: {states.book.author || "--"}</Typography>
+          </CardContent>
+          <CardActions>
+            <Button size="small">Share</Button>
+            <Button size="small">Learn More</Button>
+          </CardActions>
+        </Card>
       </main>
     </div>
   );

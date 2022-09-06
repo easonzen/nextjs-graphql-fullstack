@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@apollo/client": "^3.6.9",
-    "@graphql-yoga/node": "^2.13.12",
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@mui/material": "^5.10.3",
     "apollo-server": "^3.10.2",
     "apollo-server-micro": "^3.10.2",
     "axios": "^0.27.2",
