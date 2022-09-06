@@ -1,14 +1,12 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useCallback, useEffect } from "react";
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  gql,
-} from "@apollo/client";
+import { useCallback, useEffect, useState } from "react";
+import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
 
 export default function Article() {
+  const [states, setStates] = useState({
+    book: {},
+  });
   const router = useRouter();
   const { id } = router.query;
 
@@ -18,21 +16,32 @@ export default function Article() {
   });
 
   const getArticles = useCallback(() => {
-    // const client = ...
+    if (!id) {
+      return;
+    }
 
     client
       .query({
         query: gql`
-          query GetBooks {
-            books {
+          query GetBook($bookId: ID!) {
+            book(id: $bookId) {
+              id
               title
               author
             }
           }
         `,
+        variables: {
+          bookId: id,
+        },
       })
-      .then((result) => console.log(result));
-  }, []);
+      .then((result) => {
+        console.log(result);
+        setStates({
+          book: result.data.book,
+        });
+      });
+  }, [id]);
 
   useEffect(() => {
     getArticles();
@@ -46,7 +55,11 @@ export default function Article() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>Article ID: {id}</main>
+      <main>
+        <p>Book ID: {states.book.id || "--"}</p>
+        <p>Book Title: {states.book.title || "--"}</p>
+        <p>Book Author: {states.book.author || "--"}</p>
+      </main>
     </div>
   );
 }
